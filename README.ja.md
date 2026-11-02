@@ -204,7 +204,7 @@ craft-anything-cli rebuild - "Add a contact form" --project-folder "<your folder
 > - **いま動くもの:** デスクトップアプリ (Simple と Advanced)、CLI、MCP サーバー。Claude Code
 > をビルダーとして、Web サイト・アプリ・ゲームを「調べる → 作る → 確認する → 磨く」の順に進める
 > ワークフロー。3 つの画面幅での Web サイト確認。Unity、Unreal、Godot でのゲーム再構築。Ghidra を
-> 使うディープモード。生成画像と 3D モデル (オプトイン、自分の fal.ai キー)。プラグイン (MCP
+> 使うディープモード。生成画像 (オプトイン、OpenAI 互換の画像 API)。プラグイン (MCP
 > サーバー、および `wasm-plugins` オプション付きビルドでの WASM コンポーネント)。
 > - **一部だけ:** API キーや他のコーディングエージェントでのビルド (実装済み、実環境では未実行)、
 > アプリとゲームの挙動チェック、実物ではなくダミーの対象でしかテストしていない一部のエンジンツール。

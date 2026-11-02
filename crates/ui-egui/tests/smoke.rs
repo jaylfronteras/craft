@@ -121,13 +121,13 @@ fn a_game_is_built_with_its_engine_and_a_missing_engine_is_got_first() {
     assert!(h.state().projects.iter().all(|p| p.manifest.request != "Recreate this game"), "nothing started yet");
 }
 
-/// Whether the fal.ai key is set up, as the app keeps it.
-fn fal_key(stored: bool) -> std::collections::BTreeMap<String, bool> {
-    [(craft_anything_engines::assets::fal::ID.to_string(), stored)].into()
+/// Whether the image API key is set up, as the app keeps it.
+fn asset_key(stored: bool) -> std::collections::BTreeMap<String, bool> {
+    [(craft_anything_engines::assets::openai::ID.to_string(), stored)].into()
 }
 
 #[test]
-fn turning_on_generated_assets_without_a_fal_key_asks_for_one() {
+fn turning_on_generated_assets_without_an_api_key_asks_for_one() {
     use craft_anything_engine::workspace::TargetRef;
     use craft_anything_engines::game::{Builder, Installed, Inventory};
     use craft_anything_ui_egui::state::Modal;
@@ -145,7 +145,7 @@ fn turning_on_generated_assets_without_a_fal_key_asks_for_one() {
             engines: vec![Installed { builder: Builder::Unity, version: "6000.0.23f1".into(), program: "Unity.exe".into() }],
             ..Default::default()
         });
-        a.asset_keys = Some(fal_key(false));
+        a.asset_keys = Some(asset_key(false));
         a
     });
     h.run_steps(3);
@@ -154,8 +154,8 @@ fn turning_on_generated_assets_without_a_fal_key_asks_for_one() {
     h.run_steps(3);
     assert!(h.state().state.make.generate_assets);
     assert_eq!(h.state().state.modal, Some(Modal::Assets), "no key yet, so it's asked for");
-    h.get_by_label("Your fal.ai key");
-    h.get_by_label("fal.ai key");
+    h.get_by_label("Your API key");
+    h.get_by_label("OpenAI-compatible key");
     h.get_by_label("Not now").click();
     h.run_steps(3);
     assert_eq!(h.state().state.modal, None);
@@ -168,7 +168,7 @@ fn turning_on_generated_assets_without_a_fal_key_asks_for_one() {
         assert!(h.query_by_label_contains("original game").is_none());
     }
     // With a key, turning it on asks nothing.
-    h.state_mut().asset_keys = Some(fal_key(true));
+    h.state_mut().asset_keys = Some(asset_key(true));
     h.get_by_label("Generate custom pictures and models").click();
     h.run_steps(3);
     assert!(h.state().state.make.generate_assets && h.state().state.modal.is_none());
@@ -196,7 +196,7 @@ fn deep_mode_without_ghidra_asks_to_get_it_before_using_it() {
             engines: vec![Installed { builder: Builder::Unity, version: "6000.0.23f1".into(), program: "Unity.exe".into() }],
             ..Default::default()
         });
-        a.asset_keys = Some(fal_key(true));
+        a.asset_keys = Some(asset_key(true));
         a
     });
     h.run_steps(3);
@@ -265,7 +265,7 @@ fn a_game_project_shows_its_asset_spending_and_can_raise_the_budget() {
     let root = ws.root.clone();
     let mut h = harness(move || {
         let mut a = demo::app(demo::engine(Mode::Beginner, true));
-        a.asset_keys = Some(fal_key(true));
+        a.asset_keys = Some(asset_key(true));
         a.open_workspace(ws);
         a
     });

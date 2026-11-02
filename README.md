@@ -153,7 +153,34 @@ Anything runs your own, unmodified `claude` program, which uses your own sign-in
 never sees or handles your account. Your use of it falls under your own agreement with
 Anthropic. See [docs/claude-code.md](docs/claude-code.md) for how and why. A Codex adapter
 exists but hasn't been verified on a real install yet. Anthropic, OpenAI, OpenRouter and local
-OpenAI-compatible servers are available for questions and analysis (Settings → AI).
+OpenAI-compatible servers are available for questions and analysis (Settings → AI). Chat uses
+each backend's own API (`/chat/completions` for OpenAI-compatible servers).
+
+### Generated pictures
+
+A game can opt in to generated pictures (`rebuild --generate-assets`, or the switch on Make).
+They are made with any server that speaks the OpenAI image API, `POST {base}/images/generations`.
+
+| Setting | Where |
+|---|---|
+| Base URL | `OPENAI_BASE_URL`, or `[assets] base_url` in `config.toml` (Settings → Builds). Default `https://api.openai.com/v1`. |
+| API key | `OPENAI_API_KEY`, or Settings → AI → Game assets (stored as `assets:openai`). A server on localhost doesn't need a key. |
+| Model | `[assets] image_model` in `config.toml`, or Settings → Builds. Default `dall-e-3`. Any model name the server accepts is sent as-is. |
+
+```toml
+[assets]
+base_url = "https://api.openai.com/v1"
+image_model = "dall-e-3"
+budget_usd = 5.0
+```
+
+```sh
+export OPENAI_API_KEY=sk-test
+export OPENAI_BASE_URL=http://127.0.0.1:11434/v1   # Ollama, LM Studio, or another compatible server
+```
+
+3D models are not generated. OpenAI-compatible APIs have no standard 3D endpoint, so the builder
+uses simple shapes for objects. `assets_model_generate` says so if it is called.
 
 ## Built for agents
 
@@ -226,7 +253,7 @@ only takes it off the list.
 > - **Works today:** the desktop app (Simple and Advanced), the CLI and the MCP server; the
 >   Study → Build → Check → Refine workflow for websites, apps and games with Claude Code as the
 >   builder; website checks at three screen widths; game rebuilds in Unity, Unreal or Godot; Deep
->   mode with Ghidra; generated pictures and 3D models (opt-in, your own fal.ai key); plugins (MCP
+>   mode with Ghidra; generated pictures (opt-in, any OpenAI-compatible image API); plugins (MCP
 >   servers, and WASM components in builds with the `wasm-plugins` option).
 > - **Partly there:** building with API keys and other coding agents (built, not yet run live),
 >   behaviour checks for apps and games, a few engine tools tested only against stand-ins.

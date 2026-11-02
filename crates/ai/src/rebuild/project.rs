@@ -28,7 +28,7 @@ pub fn build_with(name: &str) -> Result<&'static stacks::Stack, ToolError> {
 /// A new project for `request` about `target` (a web address, an absolute path, or `-` for none),
 /// at `place`, with the stack the person
 /// picked (`build_with`), the asset budget from settings, and `generate_assets`: the person lets the
-/// builder generate pictures and 3D models.
+/// builder generate pictures.
 pub fn new_project(
     settings: &Settings,
     target: &str,

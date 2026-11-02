@@ -140,16 +140,18 @@ Allow generated assets	Autoriser les ressources générées
 Stop generated assets	Arrêter les ressources générées
 Paste your {name} key	Collez votre clé {name}
 Generate custom pictures and models	Générer des images et des modèles sur mesure
-Needs a fal.ai key. Until then the game is built without them.	Nécessite une clé fal.ai. En attendant, le jeu est construit sans.
-Made with fal.ai and paid from your account: {model} a 3D model, {picture} a picture. Off, the game is built without them.	Faits avec fal.ai et payés depuis votre compte : {model} par modèle 3D, {picture} par image. Désactivé, le jeu est construit sans.
-Add a fal.ai key	Ajouter une clé fal.ai
-Your fal.ai key	Votre clé fal.ai
-Generated pictures and 3D models are made with fal.ai.	Les images et modèles 3D générés sont faits avec fal.ai.
-The builder makes the game's 3D models and textures from descriptions of original designs, paid from your fal.ai account. Models are low-poly so the game runs fast. A textured model costs {model} and a picture {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain.	Le constructeur crée les modèles 3D et les textures du jeu à partir de descriptions de designs originaux, payés depuis votre compte fal.ai. Les modèles sont low-poly pour que le jeu tourne vite. Un modèle texturé coûte {model} et une image {picture}. Chaque projet a un budget de {budget}, et on vous demande avant de le dépasser. La clé est gardée dans le trousseau de votre système.
+Needs an API key. Until then the game is built without them.	Nécessite une clé d'API. En attendant, le jeu est construit sans.
+Made with an OpenAI-compatible API and paid from your account ({picture} a picture). 3D models aren't available. Off, the game is built without them.	Faits avec une API compatible OpenAI et payés depuis votre compte ({picture} par image). Les modèles 3D ne sont pas disponibles. Désactivé, le jeu est construit sans.
+Add an API key	Ajouter une clé d'API
+API base URL	URL de base de l'API
+Your API key	Votre clé d'API
+Generated pictures are made with an OpenAI-compatible API.	Les images générées sont faites avec une API compatible OpenAI.
+The builder makes pictures and textures from descriptions of original designs, paid from your API account. A picture costs {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain. 3D models aren't available on this API.	Le constructeur crée les images et les textures à partir de descriptions de designs originaux, payés depuis votre compte API. Une image coûte {picture}. Chaque projet a un budget de {budget}, et on vous demande avant de le dépasser. La clé est gardée dans le trousseau du système. Les modèles 3D ne sont pas disponibles sur cette API.
+The image server's root, ending in /v1. Blank uses OPENAI_BASE_URL, or https://api.openai.com/v1.	La racine du serveur d'images, se terminant par /v1. Vide : OPENAI_BASE_URL, ou https://api.openai.com/v1.
 Save	Enregistrer
 Get a key at {name}	Obtenir une clé sur {name}
 Game assets	Ressources de jeu
-Lets the builder make realistic 3D models and textures for games, {model} a model, with a {budget} budget per project.	Permet au constructeur de créer des modèles 3D et des textures réalistes pour les jeux, {model} par modèle, avec un budget de {budget} par projet.
+Lets the builder make pictures and textures for games, {picture} a picture, with a {budget} budget per project.	Permet au constructeur de créer des images et des textures pour les jeux, {picture} par image, avec un budget de {budget} par projet.
 Key saved	Clé enregistrée
 Remove	Retirer
 Made with {engine}	Fait avec {engine}
@@ -679,9 +681,9 @@ Builds at once	Constructions simultanées
 How many projects may build at the same time. More wait their turn.	Combien de projets peuvent construire en même temps. Les autres attendent leur tour.
 Generated art (games)	Graphismes générés (jeux)
 Budget for a new project	Budget d'un nouveau projet
-What a new game may spend on generated pictures and 3D models before you're asked. Each project keeps its own.	Ce qu'un nouveau jeu peut dépenser en images et modèles 3D générés avant qu'on vous demande. Chaque projet garde le sien.
+What a new game may spend on generated pictures before you're asked. Each project keeps its own.	Ce qu'un nouveau jeu peut dépenser en images générées avant qu'on vous demande. Chaque projet garde le sien.
 Picture model	Modèle d'images
-What pictures and textures are made with.	Ce qui sert à créer les images et les textures.
+What pictures and textures are made with. Any other name in config.toml is sent to the server as the model.	Ce qui sert à créer les images et les textures. Tout autre nom dans config.toml est envoyé au serveur comme modèle.
 a picture	une image
 Plugins add tools Craft Anything offers as its own: MCP servers (a command or an address; read their tools after adding) or WebAssembly components (a .wasm file, which can't touch your files or the network).	Les plugins ajoutent des outils que Craft Anything propose comme les siens : serveurs MCP (une commande ou une adresse ; lisez leurs outils après l'ajout) ou composants WebAssembly (un fichier .wasm, qui ne peut toucher ni à vos fichiers ni au réseau).
 No plugins yet.	Aucun plugin pour l'instant.

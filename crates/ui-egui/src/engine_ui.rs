@@ -1,6 +1,6 @@
 //! Game engines in the UI: the "Build with" choice on Make, the step-by-step "Get Unity / Unreal /
 //! Godot" dialog, the engines list in Settings, and the download progress shown everywhere. Also a
-//! game's generated-assets switch and the fal.ai key it needs.
+//! game's generated-assets switch and the API key it needs.
 //!
 //! Craft Anything downloads only what it can check (Godot against its official checksums; Unity
 //! Hub and the Epic Games Launcher against their vendors' signatures). Sign-in, licences and the
@@ -12,7 +12,7 @@ use crate::theme::{self, Tokens};
 use crate::{CraftApp, Done, icons, widgets};
 use craft_anything_ai::rebuild::KindRegistry;
 use craft_anything_engine::{CallOptions, Caller};
-use craft_anything_engines::assets::{AssetProvider, AssetProviders, fal};
+use craft_anything_engines::assets::{AssetProvider, AssetProviders, openai};
 use craft_anything_engines::game::{self, Builder, Inventory};
 use craft_anything_engines::ghidra::{self, get};
 use egui::{RichText, Ui, Vec2};
@@ -392,9 +392,13 @@ impl CraftApp {
         self.jobs.spawn("Check the asset keys", false, move |_| Ok(Done::AssetKeys(stored_keys(&hub))));
     }
 
-    /// Whether a fal.ai key is set up: it makes the generated pictures and models.
-    pub fn fal_key(&self) -> Option<bool> {
-        self.asset_keys.as_ref().map(|k| k.get(fal::ID).copied().unwrap_or(false))
+    /// Whether generated pictures can run: a key is stored, or the image server is on this machine.
+    pub fn asset_key_ready(&self) -> Option<bool> {
+        let stored = self.asset_keys.as_ref().map(|k| k.get(openai::ID).copied().unwrap_or(false))?;
+        if stored {
+            return Some(true);
+        }
+        Some(openai::allows_empty_key(&openai::resolve_base(self.settings.assets.base_url.as_deref())))
     }
 
     /// Save an asset provider's key in the system keychain.
@@ -416,7 +420,7 @@ impl CraftApp {
 
     /// Let the builder generate pictures and 3D models, or not: for the open project on its screen
     /// (through the project_assets_allow tool), else for the game being set up on Make. Turning it
-    /// on without a fal.ai key asks for one.
+    /// on without an API key asks for one (a server on this machine doesn't need one).
     pub fn set_generate_assets(&mut self, on: bool) {
         let project = self.workspace.as_ref().filter(|_| self.state.screen == Screen::Project).map(|w| w.root.clone());
         match project {
@@ -426,7 +430,7 @@ impl CraftApp {
             }
             None => self.state.make.generate_assets = on,
         }
-        if on && self.fal_key() == Some(false) {
+        if on && self.asset_key_ready() == Some(false) {
             self.state.modal = Some(Modal::Assets);
         }
     }
@@ -462,25 +466,25 @@ pub fn assets_toggle(app: &mut CraftApp, ui: &mut Ui, mut on: bool) {
     if widgets::toggle(ui, &mut on, "Generate custom pictures and models").changed() {
         app.set_generate_assets(on);
     }
-    let no_key = on && app.fal_key() == Some(false);
+    let no_key = on && app.asset_key_ready() == Some(false);
     let note = if no_key {
-        tr("Needs a fal.ai key. Until then the game is built without them.")
+        tr("Needs an API key. Until then the game is built without them.")
     } else {
         let p = AssetPrices::of(app);
         trf(
-            "Made with fal.ai and paid from your account: {model} a 3D model, {picture} a picture. Off, the game is built without them.",
-            &[("model", &p.model), ("picture", &p.picture)],
+            "Made with an OpenAI-compatible API and paid from your account ({picture} a picture). 3D models aren't available. Off, the game is built without them.",
+            &[("picture", &p.picture)],
         )
     };
     ui.horizontal_wrapped(|ui| {
         ui.label(RichText::new(note).color(if no_key { t.warning } else { t.text_dim }).size(theme::SMALL));
-        if no_key && widgets::link(ui, "Add a fal.ai key").clicked() {
+        if no_key && widgets::link(ui, "Add an API key").clicked() {
             app.state.modal = Some(Modal::Assets);
         }
     });
 }
 
-/// Asks for a fal.ai key when generated assets are turned on without one.
+/// Asks for an API key when generated pictures are turned on without one.
 pub fn assets_modal(app: &mut CraftApp, ui: &mut Ui, close: &mut bool) {
     let t = Tokens::get(ui.ctx());
     ui.set_width(520.0);
@@ -489,8 +493,8 @@ pub fn assets_modal(app: &mut CraftApp, ui: &mut Ui, close: &mut bool) {
         ui.painter().rect_filled(rect, t.radius, t.accent_soft);
         icons::paint(ui, rect, "boxes", 24.0, t.accent_ink);
         ui.vertical(|ui| {
-            ui.label(theme::heading(tr("Your fal.ai key"), theme::SECTION));
-            ui.label(RichText::new(tr("Generated pictures and 3D models are made with fal.ai.")).color(t.text_dim));
+            ui.label(theme::heading(tr("Your API key"), theme::SECTION));
+            ui.label(RichText::new(tr("Generated pictures are made with an OpenAI-compatible API.")).color(t.text_dim));
         });
     });
     ui.add_space(12.0);
@@ -499,8 +503,8 @@ pub fn assets_modal(app: &mut CraftApp, ui: &mut Ui, close: &mut bool) {
             RichText::new({
                 let p = AssetPrices::of(app);
                 trf(
-                    "The builder makes the game's 3D models and textures from descriptions of original designs, paid from your fal.ai account. Models are low-poly so the game runs fast. A textured model costs {model} and a picture {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain.",
-                    &[("model", &p.model), ("picture", &p.picture), ("budget", &p.budget)],
+                    "The builder makes pictures and textures from descriptions of original designs, paid from your API account. A picture costs {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain. 3D models aren't available on this API.",
+                    &[("picture", &p.picture), ("budget", &p.budget)],
                 )
             })
             .size(theme::BODY),
@@ -508,12 +512,12 @@ pub fn assets_modal(app: &mut CraftApp, ui: &mut Ui, close: &mut bool) {
         .wrap(),
     );
     ui.add_space(10.0);
-    let fal = fal::Fal::default();
-    keys_link(ui, &fal);
+    let provider = openai::OpenAiCompat::from_settings(app.settings.assets.base_url.as_deref());
+    keys_link(ui, &provider);
     ui.add_space(8.0);
-    if let Some(key) = key_field(app, ui, &fal, "Save") {
+    if let Some(key) = key_field(app, ui, &provider, "Save") {
         *close = true;
-        app.save_asset_key(fal.id().into(), key);
+        app.save_asset_key(provider.id().into(), key);
     }
     ui.add_space(14.0);
     if widgets::secondary(ui, None, "Not now").clicked() {
@@ -524,8 +528,6 @@ pub fn assets_modal(app: &mut CraftApp, ui: &mut Ui, close: &mut bool) {
 
 /// Prices for the text about generated art, from the asset table and Settings.
 struct AssetPrices {
-    /// A textured 3D model ("about $0.53").
-    model: String,
     /// A square picture with the chosen picture model.
     picture: String,
     /// A new project's budget ("$5.00").
@@ -539,8 +541,7 @@ impl AssetPrices {
         let table = Catalogue::built_in();
         let picture =
             table.image_model(app.settings.assets.image_model.as_deref()).or_else(|_| table.image_model(None)).map(|m| m.cost(Shape::Square)).unwrap_or(0.0);
-        let model = table.model_3d(None).map(|m| m.cost(true)).unwrap_or(0.0) + picture;
-        AssetPrices { model: asset_cost_words(model), picture: asset_cost_words(picture), budget: tr(&usd(app.settings.assets.budget())) }
+        AssetPrices { picture: asset_cost_words(picture), budget: tr(&usd(app.settings.assets.budget())) }
     }
 }
 
@@ -562,8 +563,8 @@ pub fn assets_settings(app: &mut CraftApp, ui: &mut Ui) {
             RichText::new({
                 let p = AssetPrices::of(app);
                 trf(
-                    "Lets the builder make realistic 3D models and textures for games, {model} a model, with a {budget} budget per project.",
-                    &[("model", &p.model), ("budget", &p.budget)],
+                    "Lets the builder make pictures and textures for games, {picture} a picture, with a {budget} budget per project.",
+                    &[("picture", &p.picture), ("budget", &p.budget)],
                 )
             })
             .color(t.text_faint)

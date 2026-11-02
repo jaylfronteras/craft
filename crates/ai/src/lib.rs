@@ -473,10 +473,19 @@ impl AiHub {
         Ok(removed)
     }
 
-    /// Some built-in asset provider has a key, so builds can generate assets.
+    /// Some built-in asset provider has a key, or the image server is on this machine and needs
+    /// none, so builds can generate pictures.
     pub fn has_asset_keys(&self) -> bool {
         let providers = craft_anything_engines::assets::AssetProviders::built_in();
-        providers.ids().into_iter().any(|id| self.has_asset_key(&providers, id))
+        if providers.ids().into_iter().any(|id| self.has_asset_key(&providers, id)) {
+            return true;
+        }
+        let base_url = match self.engine.try_session() {
+            Some(s) => s.settings.assets.base_url.clone(),
+            None => Settings::load_from(&self.settings_path()).assets.base_url,
+        };
+        let base = craft_anything_engines::assets::openai::resolve_base(base_url.as_deref());
+        craft_anything_engines::assets::openai::allows_empty_key(&base)
     }
 
     /// Save an asset provider's key (keychain first). Returns where it went.

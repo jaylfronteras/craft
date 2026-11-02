@@ -87,7 +87,7 @@ const ACTIONS: &[Action] = &[
     a("save_asset_key",      "save an asset provider's key in the keychain",   Tool(&["assets_key_set"])),
     a("remove_asset_key",    "forget an asset provider's key",                 Tool(&["assets_key_remove"])),
     a("Engine › Open",       "open Unity Hub or the Epic Games Launcher",      Tool(&["engines_app_open"])),
-    a("Download pages",      "open an engine's or fal.ai's download page",     UiOnly("a link; engines_install returns the page for vendor installs")),
+    a("Download pages",      "open an engine's download page",                  UiOnly("a link; engines_install returns the page for vendor installs")),
 
     // ---- Settings ----------------------------------------------------------------------------
     a("set_mode",            "Beginner or Experienced",                        Tool(&["settings_set"])),

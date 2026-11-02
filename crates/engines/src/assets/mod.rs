@@ -1,10 +1,11 @@
-//! Generated game assets: pictures (textures, skies, concept art) and game-ready 3D models, made
-//! by a paid provider. Each provider is an [`AssetProvider`]; an [`AssetProviders`] registry holds
-//! them (built in: [`fal::Fal`]). The models and their prices come from the `assets.toml` table
-//! ([`Catalogue`]), so a cost is known before anything is spent, and every generation reports
-//! what it cost. Audio would be one more [`AssetRequest`] variant and table.
+//! Generated game assets: pictures (textures, skies, concept art) made by an OpenAI-compatible
+//! image API. Each provider is an [`AssetProvider`]; an [`AssetProviders`] registry holds them
+//! (built in: [`openai::OpenAiCompat`]). The models and their prices come from the `assets.toml`
+//! table ([`Catalogue`]), so a cost is known before anything is spent, and every generation
+//! reports what it cost. There is no standard 3D endpoint, so the built-in provider refuses
+//! [`AssetRequest::Model3d`]. Audio would be one more [`AssetRequest`] variant and table.
 
-pub mod fal;
+pub mod openai;
 
 use craft_anything_evidence::{ErrorCode, ToolError};
 use serde::Deserialize;
@@ -19,14 +20,15 @@ pub enum AssetKind {
     Model3d,
 }
 
-/// Picture shapes, with their pixel size.
+/// Picture shapes. The images API is asked for 1024×1024, or a wider or taller size
+/// (1792 on the long side, 1536 for a gpt-image model).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shape {
     /// 1024×1024: objects, textures, icons.
     Square,
-    /// 1024×576: skies, backgrounds, title screens.
+    /// Landscape: skies, backgrounds, title screens.
     Wide,
-    /// 576×1024: posters, tall props.
+    /// Portrait: posters, tall props.
     Tall,
 }
 
@@ -40,23 +42,16 @@ impl Shape {
         }
     }
 
+    /// DALL-E 3's pixel count for this shape, for a per-megapixel price. gpt-image's wide and
+    /// tall sizes are a little smaller; the estimate uses this.
     pub fn megapixels(self) -> f64 {
-        match self {
-            Shape::Square => 1024.0 * 1024.0 / 1e6,
-            Shape::Wide | Shape::Tall => 1024.0 * 576.0 / 1e6,
-        }
+        let (w, h) = match self {
+            Shape::Square => (1024.0, 1024.0),
+            Shape::Wide => (1792.0, 1024.0),
+            Shape::Tall => (1024.0, 1792.0),
+        };
+        w * h / 1e6
     }
-}
-
-/// How a picture model is told the shape it should make.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum SizeBy {
-    /// A named size (`square_hd`, `landscape_16_9`), as FLUX takes it.
-    #[default]
-    ImageSize,
-    /// An aspect ratio (`1:1`, `16:9`), as Nano Banana Pro takes it.
-    AspectRatio,
 }
 
 /// A picture model from the table.
@@ -73,11 +68,12 @@ pub struct ImageModel {
     /// The price by size; a model billed per picture leaves it at 0.
     #[serde(default)]
     pub usd_per_megapixel: f64,
-    /// The price per picture, whatever its size.
+    /// The price of a square picture.
     #[serde(default)]
     pub usd_per_image: f64,
+    /// The price of a wide or tall picture. 0 means the same as [`Self::usd_per_image`].
     #[serde(default)]
-    pub size_by: SizeBy,
+    pub usd_large: f64,
     /// The model weights' licence, for the person choosing one.
     #[serde(default)]
     pub licence: String,
@@ -86,7 +82,17 @@ pub struct ImageModel {
 impl ImageModel {
     /// What a picture of this shape costs.
     pub fn cost(&self, shape: Shape) -> f64 {
-        self.usd_per_image + self.usd_per_megapixel * shape.megapixels()
+        let flat = match shape {
+            Shape::Square => self.usd_per_image,
+            Shape::Wide | Shape::Tall => {
+                if self.usd_large > 0.0 {
+                    self.usd_large
+                } else {
+                    self.usd_per_image
+                }
+            }
+        };
+        flat + self.usd_per_megapixel * shape.megapixels()
     }
 }
 
@@ -120,6 +126,8 @@ impl Model3d {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 struct Defaults {
     image: String,
+    /// Empty when the table offers no 3D generator.
+    #[serde(default)]
     model_3d: String,
 }
 
@@ -154,7 +162,7 @@ impl Catalogue {
     /// endpoint or an empty face range are left out (asking for them gives a clear error).
     pub fn parse(text: &str) -> Result<Catalogue, toml::de::Error> {
         let mut c: Catalogue = toml::from_str(text)?;
-        c.image.retain(|m| price_ok(m.usd_per_megapixel) && price_ok(m.usd_per_image) && !m.endpoint.trim().is_empty());
+        c.image.retain(|m| price_ok(m.usd_per_megapixel) && price_ok(m.usd_per_image) && price_ok(m.usd_large) && !m.endpoint.trim().is_empty());
         c.model_3d.retain(|m| {
             price_ok(m.usd) && price_ok(m.textured_usd) && !m.endpoint.trim().is_empty() && {
                 let [low, high] = m.faces;
@@ -164,30 +172,22 @@ impl Catalogue {
         Ok(c)
     }
 
-    /// The defaults the table ships with, in code: Nano Banana Pro and Tripo P1 on fal.ai.
+    /// The defaults the table ships with, in code: DALL-E 3 on an OpenAI-compatible server.
+    /// 3D generation has no standard endpoint, so none is listed.
     pub fn fallback() -> Catalogue {
         Catalogue {
-            default: Defaults { image: "nano-banana-pro".into(), model_3d: "tripo-p1".into() },
+            default: Defaults { image: "dall-e-3".into(), model_3d: String::new() },
             image: vec![ImageModel {
-                id: "nano-banana-pro".into(),
-                provider: fal::ID.into(),
-                name: "Nano Banana Pro".into(),
-                endpoint: "fal-ai/nano-banana-pro".into(),
+                id: "dall-e-3".into(),
+                provider: openai::ID.into(),
+                name: "DALL-E 3".into(),
+                endpoint: "dall-e-3".into(),
                 usd_per_megapixel: 0.0,
-                usd_per_image: 0.15,
-                size_by: SizeBy::AspectRatio,
-                licence: "Commercial use enabled through fal.ai".into(),
+                usd_per_image: 0.04,
+                usd_large: 0.08,
+                licence: "Generated through the image API; the provider's terms apply".into(),
             }],
-            model_3d: vec![Model3d {
-                id: "tripo-p1".into(),
-                provider: fal::ID.into(),
-                name: "Tripo P1".into(),
-                endpoint: "tripo3d/p1/image-to-3d".into(),
-                usd: 0.40,
-                textured_usd: 0.50,
-                faces: [48, 20_000],
-                licence: String::new(),
-            }],
+            model_3d: Vec::new(),
         }
     }
 
@@ -197,6 +197,23 @@ impl Catalogue {
 
     pub fn models_3d(&self) -> &[Model3d] {
         &self.model_3d
+    }
+
+    /// The picture model to send. A table id uses that row. Any other non-empty name is sent
+    /// as the API `model`, priced like the default (the server's own price may differ).
+    pub fn resolve_image(&self, id: Option<&str>) -> Result<ImageModel, ToolError> {
+        if let Ok(model) = self.image_model(id) {
+            return Ok(model.clone());
+        }
+        let raw = id.map(str::trim).filter(|s| !s.is_empty());
+        let Some(raw) = raw else {
+            return self.image_model(None).cloned();
+        };
+        let mut model = self.image_model(None)?.clone();
+        model.id = raw.to_string();
+        model.name = raw.to_string();
+        model.endpoint = raw.to_string();
+        Ok(model)
     }
 
     /// The picture model `id` names, or the default one when `id` is `None` or empty.
@@ -272,14 +289,18 @@ pub struct Generated {
 
 /// A paid service that generates assets.
 pub trait AssetProvider: Send + Sync {
-    /// Stable id, named by the table's `provider` (`"fal"`).
+    /// Stable id, named by the table's `provider` (`"openai"`).
     fn id(&self) -> &'static str;
-    /// Shown to the person ("fal.ai").
+    /// Shown to the person ("OpenAI-compatible").
     fn name(&self) -> &'static str;
-    /// The environment variable the provider's own tools read its key from (`FAL_KEY`), used
-    /// when no key is stored.
+    /// The environment variable the provider's own tools read its key from (`OPENAI_API_KEY`),
+    /// used when no key is stored.
     fn key_env(&self) -> Option<&'static str> {
         None
+    }
+    /// A loopback server can be called with no key.
+    fn allows_empty_key(&self) -> bool {
+        false
     }
     /// Where the person gets a key (shown as a link in Settings → AI).
     fn keys_page(&self) -> Option<&'static str> {
@@ -312,9 +333,9 @@ impl Default for AssetProviders {
 }
 
 impl AssetProviders {
-    /// fal.ai.
+    /// The OpenAI-compatible image API.
     pub fn built_in() -> AssetProviders {
-        AssetProviders { providers: vec![Arc::new(fal::Fal::default())] }
+        AssetProviders { providers: vec![Arc::new(openai::OpenAiCompat::default())] }
     }
 
     /// Add a provider, or replace the one with the same id.
@@ -360,32 +381,28 @@ mod tests {
         let t = Catalogue::parse(include_str!("assets.toml")).unwrap();
         let f = Catalogue::fallback();
         assert_eq!(t.image_model(None).unwrap(), f.image_model(None).unwrap());
-        assert_eq!(t.model_3d(None).unwrap(), f.model_3d(None).unwrap());
+        assert!(t.model_3d(None).is_err() && f.model_3d(None).is_err(), "no 3D model on an OpenAI-compatible API");
         assert_eq!(Catalogue::built_in(), &t);
-        let schnell = t.image_model(Some("flux-schnell")).unwrap();
-        assert_eq!(schnell.endpoint, "fal-ai/flux/schnell");
-        assert!(schnell.cost(Shape::Square) < t.image_model(Some("flux-dev")).unwrap().cost(Shape::Square));
-        let nano = t.image_model(None).unwrap();
-        assert_eq!((nano.id.as_str(), nano.endpoint.as_str(), nano.size_by), ("nano-banana-pro", "fal-ai/nano-banana-pro", SizeBy::AspectRatio));
-        assert_eq!(t.image_model(Some("flux-dev")).unwrap().size_by, SizeBy::ImageSize, "a named size unless the table says otherwise");
+        let gpt = t.image_model(Some("gpt-image-1")).unwrap();
+        assert_eq!(gpt.endpoint, "gpt-image-1");
+        assert!(gpt.cost(Shape::Wide) < t.image_model(None).unwrap().cost(Shape::Wide));
+        let dalle = t.image_model(None).unwrap();
+        assert_eq!((dalle.id.as_str(), dalle.endpoint.as_str(), dalle.usd_per_image, dalle.usd_large), ("dall-e-3", "dall-e-3", 0.04, 0.08));
+        let custom = t.resolve_image(Some("local-flux")).unwrap();
+        assert_eq!(custom.endpoint, "local-flux");
+        assert_eq!(custom.cost(Shape::Square), dalle.cost(Shape::Square));
         for m in t.images() {
             assert!(AssetProviders::built_in().get(&m.provider).is_some(), "{} names an unknown provider", m.id);
         }
     }
 
     #[test]
-    fn prices_and_face_limits() {
+    fn prices_follow_the_shape() {
         let c = Catalogue::built_in();
-        let flux = c.image_model(Some("flux-dev")).unwrap();
-        assert!((flux.cost(Shape::Square) - 0.0262144).abs() < 1e-9, "1024×1024 at $0.025 per megapixel");
-        assert!(flux.cost(Shape::Wide) < flux.cost(Shape::Square));
-        let nano = c.image_model(None).unwrap();
-        assert_eq!((nano.cost(Shape::Square), nano.cost(Shape::Wide)), (0.15, 0.15), "per picture, whatever its shape");
-        let tripo = c.model_3d(Some(" ")).unwrap();
-        assert_eq!((tripo.cost(true), tripo.cost(false)), (0.50, 0.40));
-        assert_eq!(tripo.faces(), 48..=20_000);
-        assert_eq!(about_usd(tripo.cost(true) + flux.cost(Shape::Square)), "about $0.53");
-        assert_eq!(about_usd(tripo.cost(true) + nano.cost(Shape::Square)), "about $0.65");
+        let dalle = c.image_model(None).unwrap();
+        assert_eq!((dalle.cost(Shape::Square), dalle.cost(Shape::Wide), dalle.cost(Shape::Tall)), (0.04, 0.08, 0.08));
+        assert!(c.model_3d(Some(" ")).is_err());
+        assert_eq!(about_usd(dalle.cost(Shape::Square)), "about $0.04");
         assert_eq!(about_usd(0.0031), "under $0.01");
         assert_eq!(usd(0.0262144), "$0.03");
     }
@@ -401,13 +418,13 @@ mod tests {
             model_3d = "upside-down"
             [[image]]
             id = "free"
-            provider = "fal"
+            provider = "openai"
             name = "x"
             endpoint = "x"
             usd_per_image = -1.0
             [[model_3d]]
             id = "upside-down"
-            provider = "fal"
+            provider = "openai"
             name = "x"
             endpoint = "x"
             usd = 0.1
@@ -420,8 +437,8 @@ mod tests {
         assert_eq!(e.code, ErrorCode::BadSettings);
         assert!(e.message.contains("\"free\""), "{}", e.message);
         assert!(odd.model_3d(None).is_err());
-        let e = Catalogue::fallback().image_model(Some("dall-e")).unwrap_err();
-        assert!(e.remediation.unwrap_or_default().contains("nano-banana-pro"));
+        let e = Catalogue::fallback().image_model(Some("no-such-model")).unwrap_err();
+        assert!(e.remediation.unwrap_or_default().contains("dall-e-3"));
     }
 
     #[test]
@@ -439,7 +456,7 @@ mod tests {
             }
         }
         let mut r = AssetProviders::built_in();
-        assert_eq!(r.ids(), vec!["fal"]);
+        assert_eq!(r.ids(), vec!["openai"]);
         let mut m = Catalogue::fallback().image_model(None).unwrap().clone();
         m.provider = "stub".into();
         let req = AssetRequest::Image { model: &m, prompt: "a crate", shape: Shape::Square };

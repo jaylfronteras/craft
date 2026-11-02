@@ -80,7 +80,8 @@ About 60 GB, an Epic Games account, and Visual Studio's C++ tools.	约 60 GB，�
 Add	添加
 Add Visual Studio's C++ tools	添加 Visual Studio 的 C++ 工具
 Add a brain	添加 AI
-Add a fal.ai key	添加 fal.ai 密钥
+Add an API key	添加 API 密钥
+API base URL	API 基址
 Add a folder…	添加文件夹…
 Add a plugin	添加插件
 Add an AI brain and I'll read this evidence for you, answer follow-up questions and point at the proof.	添加 AI 助手后，我就能为你解读这些证据、回答后续问题，并指出依据。
@@ -444,7 +445,7 @@ Generate a picture	生成图片
 Generate custom pictures and models	生成自定义图片和模型
 Generated art (games)	生成美术素材 (游戏)
 Generated assets	生成素材
-Generated pictures and 3D models are made with fal.ai.	使用 fal.ai 生成图片和 3D 模型。
+Generated pictures are made with an OpenAI-compatible API.	生成的图片通过兼容 OpenAI 的接口制作。
 Get Ghidra	获取 Ghidra
 Get Ghidra for Deep mode	获取 Ghidra 以用于深度模式
 Get Unity Hub	获取 Unity Hub
@@ -580,7 +581,7 @@ Leave a path empty to use the managed install. We never need environment variabl
 Leave empty to use the one Craft Anything sets up.	留空则使用 Craft Anything 安装的版本。
 Let a project generate assets	允许项目生成素材
 Let's go	开始吧
-Lets the builder make realistic 3D models and textures for games, {model} a model, with a {budget} budget per project.	允许构建助手为游戏制作逼真的 3D 模型和纹理，每个模型 {model}，每个项目预算 {budget}。
+Lets the builder make pictures and textures for games, {picture} a picture, with a {budget} budget per project.	允许构建助手为游戏制作图片和纹理，每张图片 {picture}，每个项目预算 {budget}。
 Library resolution	库解析
 Light copy: shares big files with the project	轻量副本：与项目共享大型文件
 Likeness	相似度
@@ -635,7 +636,7 @@ Looking on this computer…	正在此电脑上查找…
 Low	低
 Mach-O structure	Mach-O 结构
 Made a copy: {name}	已创建副本：{name}
-Made with fal.ai and paid from your account: {model} a 3D model, {picture} a picture. Off, the game is built without them.	使用 fal.ai 制作，费用从你的账户扣除：每个 3D 模型 {model}，每张图片 {picture}。关闭后，构建游戏时不会生成这些素材。
+Made with an OpenAI-compatible API and paid from your account ({picture} a picture). 3D models aren't available. Off, the game is built without them.	使用兼容 OpenAI 的接口制作，费用从你的账户扣除（每张图片 {picture}）。不提供 3D 模型。关闭后，构建游戏时不会生成这些素材。
 Made with {engine}	使用 {engine} 制作
 Made without looking inside the original.	未查看原作内部而制作。
 Make a game that plays like this	制作玩法类似的游戏
@@ -671,7 +672,7 @@ Name an address	为地址命名
 Name at address	地址处的名称
 Name many addresses	为多个地址命名
 Names the program's author gave to functions or variables that survived in the file.	程序作者为函数或变量起的名称，仍保留在文件中。
-Needs a fal.ai key. Until then the game is built without them.	需要 fal.ai 密钥。添加之前，构建游戏时不会生成这些素材。
+Needs an API key. Until then the game is built without them.	需要 API 密钥。添加之前，构建游戏时不会生成这些素材。
 Needs you	需要你处理
 Network	网络
 New	新建
@@ -1051,7 +1052,8 @@ That folder already has {names}, where Craft Anything keeps its own files. Pick 
 That folder is already a project, so it's open now.	该文件夹已经是项目，现已打开。
 The Rust toolchain (rustup.rs).	Rust 工具链 (rustup.rs)。
 The builder answers its own questions and says what it chose ("I decided: …"), so you can change it.	构建助手会自行回答问题并说明选择 (“我决定：…”)，方便你修改。
-The builder makes the game's 3D models and textures from descriptions of original designs, paid from your fal.ai account. Models are low-poly so the game runs fast. A textured model costs {model} and a picture {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain.	构建助手根据原创设计的描述生成游戏的 3D 模型和纹理，费用从你的 fal.ai 账户扣除。模型采用低多边形设计，让游戏运行流畅。带纹理的模型费用为 {model}，图片费用为 {picture}。每个项目的预算为 {budget}，超出前会先询问你。密钥保存在系统钥匙串中。
+The builder makes pictures and textures from descriptions of original designs, paid from your API account. A picture costs {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain. 3D models aren't available on this API.	构建助手根据原创设计的描述生成图片和纹理，费用从你的 API 账户扣除。每张图片费用为 {picture}。每个项目的预算为 {budget}，超出前会先询问你。密钥保存在系统钥匙串中。此接口不提供 3D 模型。
+The image server's root, ending in /v1. Blank uses OPENAI_BASE_URL, or https://api.openai.com/v1.	图像服务的根地址，以 /v1 结尾。留空则使用 OPENAI_BASE_URL，或 https://api.openai.com/v1。
 The builder reads them (code, notes, pictures) and builds the app in a new app folder beside them. Your files stay as they are.	构建助手会读取这些文件 (代码、笔记、图片)，并在旁边新建 app 文件夹来构建应用。你的文件保持不变。
 The builder will decide its questions and tell you what it chose.	构建助手会自行决定，并告知你它的选择。
 The builder works on these files directly and keeps what works. Craft Anything adds a few records of its own beside them.	构建助手直接编辑这些文件，并保留已有的有效内容。Craft Anything 会在旁边添加少量自身记录。
@@ -1157,7 +1159,7 @@ Website address	网站地址
 Website pages	网站页面
 Websites	网站
 Welcome	欢迎
-What a new game may spend on generated pictures and 3D models before you're asked. Each project keeps its own.	新游戏在询问你之前可用于生成图片和 3D 模型的金额。每个项目分别保存预算。
+What a new game may spend on generated pictures before you're asked. Each project keeps its own.	新游戏在询问你之前可用于生成图片的金额。每个项目分别保存预算。
 What a program exports	程序导出的内容
 What a program imports	程序导入的内容
 What are its main parts?	它主要由哪些部分组成？
@@ -1181,7 +1183,7 @@ What is this?	这是什么？
 What it calls	它调用了什么
 What kind of file is this?	这是什么类型的文件？
 What permissions does it ask for?	它请求哪些权限？
-What pictures and textures are made with.	用于生成图片和纹理的模型。
+What pictures and textures are made with. Any other name in config.toml is sent to the server as the model.	用于生成图片和纹理的模型。config.toml 里的其他名称会原样发给服务器作为模型名。
 What settings are in here?	这里面有哪些设置？
 What tables are in here?	这里有哪些数据表？
 What we couldn't check	无法检查的内容
@@ -1243,7 +1245,7 @@ You chose:	你的选择：
 You're all set	准备就绪
 Your app is ready	你的应用已就绪
 Your brains	你的 AI 助手
-Your fal.ai key	你的 fal.ai 密钥
+Your API key	你的 API 密钥
 Your game is ready	你的游戏已就绪
 Your message wasn't sent: another project was opened while its pictures were copied.	消息未发送：复制图片期间打开了另一个项目。
 Your own tool installs (optional)	自行安装的工具 (可选)

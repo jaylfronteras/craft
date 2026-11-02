@@ -17,9 +17,6 @@ const KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(3);
 
 const FILE_HEADER: &str = "# Craft Anything AI keys: FALLBACK STORE.\n# These keys are here because no OS keychain was available when they were saved.\n# This file is readable only by you (0600). Delete a line to forget a key.\n";
 
-/// Where the fal.ai key for generated game assets is stored.
-pub const FAL_KEY: &str = "assets:fal";
-
 /// Where an asset provider's key is stored (`assets:<provider id>`).
 pub fn asset_key_name(provider: &str) -> String {
     format!("assets:{provider}")
@@ -35,11 +32,6 @@ pub fn asset_keys(store: &KeyStore, providers: &AssetProviders) -> AssetKeys {
     AssetKeys(
         providers.ids().into_iter().filter_map(|id| providers.get(id)).filter_map(|p| asset_key(store, p.as_ref()).map(|k| (p.id().to_string(), k))).collect(),
     )
-}
-
-/// The fal.ai key for game assets: stored, else fal's environment variable.
-pub fn fal_key(store: &KeyStore) -> Option<String> {
-    asset_key(store, &craft_anything_engines::assets::fal::Fal::default())
 }
 
 /// The environment variable conventionally holding a key for this kind.
@@ -216,14 +208,14 @@ mod tests {
         s.set(&asset_key_name("other"), "o-1").unwrap();
         let keys = asset_keys(&s, &providers);
         assert_eq!(keys.get("other"), Some("o-1"));
-        // fal's is stored where it always was, apart from the other provider's.
-        assert_eq!(asset_key_name("fal"), FAL_KEY);
-        s.set(FAL_KEY, "f-1").unwrap();
+        // The image provider's key is stored apart from the other provider's.
+        assert_eq!(asset_key_name("openai"), "assets:openai");
+        s.set("assets:openai", "k-1").unwrap();
         let keys = asset_keys(&s, &providers);
-        assert_eq!((keys.get("fal"), keys.get("other")), (Some("f-1"), Some("o-1")));
+        assert_eq!((keys.get("openai"), keys.get("other")), (Some("k-1"), Some("o-1")));
         s.delete(&asset_key_name("other")).unwrap();
         assert_eq!(asset_keys(&s, &providers).get("other"), None);
-        assert_eq!(fal_key(&s).as_deref(), Some("f-1"));
+        assert_eq!(asset_key(&s, &craft_anything_engines::assets::openai::OpenAiCompat::new("https://api.openai.com/v1")).as_deref(), Some("k-1"));
     }
 
     /// #262: a key file that can't be read is left as it is, with every other key in it.
@@ -232,19 +224,19 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let file = dir.path().join("ai-keys.toml");
         let s = KeyStore::file_only(file.clone());
-        let valid = b"FakeBackend = \"sk-test-backend\"\n\"assets:fal\" = \"sk-test-old\"\n".to_vec();
-        let broken_toml = b"FakeBackend = \"sk-test-backend\"\n\"assets:fal\" = \"sk-test-old\n".to_vec();
+        let valid = b"FakeBackend = \"sk-test-backend\"\n\"assets:openai\" = \"sk-test-old\"\n".to_vec();
+        let broken_toml = b"FakeBackend = \"sk-test-backend\"\n\"assets:openai\" = \"sk-test-old\n".to_vec();
         let broken_utf8 = [valid.clone(), b"\xff".to_vec()].concat();
         for bad in [broken_toml, broken_utf8] {
             std::fs::write(&file, &bad).unwrap();
-            let e = s.set(FAL_KEY, "sk-test-new").unwrap_err();
+            let e = s.set("assets:openai", "sk-test-new").unwrap_err();
             assert!(e.message.contains("Couldn't read the key file"), "{e:?}");
             assert!(s.delete("FakeBackend").is_err());
             assert_eq!(std::fs::read(&file).unwrap(), bad, "the file was changed");
         }
         std::fs::write(&file, &valid).unwrap();
-        assert_eq!(s.set(FAL_KEY, "sk-test-new").unwrap(), "file");
-        assert_eq!((s.get("FakeBackend").as_deref(), s.get(FAL_KEY).as_deref()), (Some("sk-test-backend"), Some("sk-test-new")));
+        assert_eq!(s.set("assets:openai", "sk-test-new").unwrap(), "file");
+        assert_eq!((s.get("FakeBackend").as_deref(), s.get("assets:openai").as_deref()), (Some("sk-test-backend"), Some("sk-test-new")));
     }
 
     #[test]

@@ -197,7 +197,7 @@ craft-anything-cli rebuild - "Add a contact form" --project-folder "<your folder
 > [!IMPORTANT]
 > **현재 상태:** Craft Anything은 Early Alpha 단계입니다. 지금 되는 것, 일부만 되는 것, 다음 계획은 다음과 같습니다:
 >
-> - **지금 되는 것:** 데스크톱 앱(Simple 및 Advanced), CLI, MCP 서버. Claude Code를 빌더로 쓰는 웹사이트, 앱, 게임의 Study → Build → Check → Refine 워크플로. 세 가지 화면 너비의 웹사이트 검사. Unity, Unreal 또는 Godot 게임 재구현. Ghidra를 쓰는 Deep 모드. 이미지 및 3D 모델 생성(선택 사항, 본인의 fal.ai 키 사용). 플러그인(MCP 서버, 그리고 `wasm-plugins` 옵션으로 빌드할 때 WASM 컴포넌트).
+> - **지금 되는 것:** 데스크톱 앱(Simple 및 Advanced), CLI, MCP 서버. Claude Code를 빌더로 쓰는 웹사이트, 앱, 게임의 Study → Build → Check → Refine 워크플로. 세 가지 화면 너비의 웹사이트 검사. Unity, Unreal 또는 Godot 게임 재구현. Ghidra를 쓰는 Deep 모드. 이미지 생성(선택 사항, OpenAI 호환 이미지 API). 플러그인(MCP 서버, 그리고 `wasm-plugins` 옵션으로 빌드할 때 WASM 컴포넌트).
 > - **부분적으로 됨:** API 키와 다른 코딩 에이전트로 빌드(구현은 되었지만 실제 실행은 아직 안 함), 앱과 게임의 동작 검사, 모의 대상(stand-in)으로만 테스트된 일부 엔진 도구.
 > - **다음:** 첫 공개 릴리스(Windows, macOS, Linux, FreeBSD용 설치 프로그램과 브라우저 뷰어는 CI에 준비되어 있음), 그다음 관리형 요금제.
 >

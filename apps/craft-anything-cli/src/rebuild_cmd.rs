@@ -51,8 +51,9 @@ pub struct RebuildArgs {
     /// New projects only; otherwise it's chosen from the request and target.
     #[arg(long)]
     pub build_with: Option<String>,
-    /// Let the builder generate pictures and 3D models for a new game (needs a fal.ai key; paid
-    /// within the project's asset budget). Change it later with `project-assets-allow`.
+    /// Let the builder generate pictures for a new game (OpenAI-compatible image API: OPENAI_API_KEY
+    /// or a stored key, OPENAI_BASE_URL or [assets] base_url; paid within the project's asset budget).
+    /// 3D models aren't generated. Change it later with `project-assets-allow`.
     #[arg(long)]
     pub generate_assets: bool,
 }
