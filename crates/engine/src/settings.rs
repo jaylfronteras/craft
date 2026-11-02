@@ -166,17 +166,20 @@ impl BuildSettings {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AssetSettings {
-    /// What a new project may spend on generated pictures and 3D models before the person is
-    /// asked (US dollars). Each project keeps its own budget once created.
+    /// What a new project may spend on generated pictures before the person is asked (US dollars).
+    /// Each project keeps its own budget once created.
     pub budget_usd: f64,
-    /// The picture model, by its id in the asset table (`nano-banana-pro`, `flux-dev`…); `None` = the
-    /// table's default.
+    /// The picture model: an id in the asset table (`dall-e-3`, `gpt-image-1`) or any model name
+    /// the server accepts. `None` = the table's default.
     pub image_model: Option<String>,
+    /// OpenAI-compatible API root, ending in `/v1`. `None` uses `OPENAI_BASE_URL`, then
+    /// `https://api.openai.com/v1`.
+    pub base_url: Option<String>,
 }
 
 impl Default for AssetSettings {
     fn default() -> Self {
-        AssetSettings { budget_usd: crate::workspace::ASSET_BUDGET_USD, image_model: None }
+        AssetSettings { budget_usd: crate::workspace::ASSET_BUDGET_USD, image_model: None, base_url: None }
     }
 }
 
@@ -520,11 +523,13 @@ default = "Claude Code"
         let old: Settings = toml::from_str("mode = \"experienced\"\nauto_mode = false\n").unwrap();
         assert_eq!(old.assets.budget(), 5.0, "a config without [assets] gets the built-in budget");
         assert_eq!(old.assets.image_model, None);
+        assert_eq!(old.assets.base_url, None);
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.toml");
         let mut s = Settings::default();
         s.assets.budget_usd = 12.5;
-        s.assets.image_model = Some("flux-schnell".into());
+        s.assets.image_model = Some("gpt-image-1".into());
+        s.assets.base_url = Some("http://127.0.0.1:11434/v1".into());
         s.save_to(&path).unwrap();
         assert_eq!(Settings::load_from(&path), s);
         let odd: Settings = toml::from_str("[assets]\nbudget_usd = -3.0\n").unwrap();

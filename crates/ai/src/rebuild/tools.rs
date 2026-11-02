@@ -144,8 +144,8 @@ pub struct StartParams {
     /// What to build with: an engine (unity, unreal, godot, rust) or a stack's full name.
     #[serde(default)]
     pub build_with: Option<String>,
-    /// For a new game: the builder may generate pictures and 3D models (paid from the person's
-    /// asset provider key, within the project's budget). Default false; change it later with
+    /// For a new game: the builder may generate pictures (paid from the person's OpenAI-compatible
+    /// key, within the project's budget). Default false; change it later with
     /// project_assets_allow.
     #[serde(default)]
     pub generate_assets: bool,

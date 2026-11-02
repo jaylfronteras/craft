@@ -1,52 +1,32 @@
-# The models Craft Anything generates game assets with, and what each one costs (US dollars, the
-# provider's listed prices). `provider` names an asset provider in the registry (`fal`), and
-# `endpoint` is the model's address at that provider. The `[default]` table picks the model used
-# when Settings names none; `[assets] image_model` in config.toml picks another picture model by
-# its `id`. A table that doesn't parse falls back to the built-in defaults (a test keeps it parsing).
+# Picture models for the OpenAI-compatible image API (`POST {base}/images/generations`).
+# `provider` is the asset provider id (`openai`). `endpoint` is the `model` field sent to the
+# server. Prices are list prices used to stay inside a project's budget; the API does not return
+# a bill. DALL-E 3 standard quality is $0.040 at 1024×1024 and $0.080 at 1792×1024 or 1024×1792
+# (OpenAI's published prices). GPT Image is billed by tokens; $0.040 / $0.060 is a rough
+# medium-quality estimate, not an invoice. A `[assets] image_model` value that isn't an id here
+# is still sent as the model name, priced like the default. The server is `[assets] base_url`,
+# else OPENAI_BASE_URL, else https://api.openai.com/v1. The key is OPENAI_API_KEY or the stored
+# `assets:openai` key.
+#
+# 3D models are not listed. OpenAI-compatible APIs have no standard 3D endpoint.
 
 [default]
-image = "nano-banana-pro"
-model_3d = "tripo-p1"
-
-# Pictures (textures, skies, concept art), billed by megapixel (`usd_per_megapixel`) or per picture
-# (`usd_per_image`). `size_by` says how the model is told the shape: `image_size` (a named size, the
-# default) or `aspect_ratio`. FLUX prices checked against fal's model pages on 2026-10-19; fal rounds
-# each picture up to whole megapixels, which the estimate doesn't yet.
-
-# Checked on fal's model page on 2026-10-20: $0.15 per picture at 1K and 2K (4K costs double; we ask
-# for the default 1K).
-[[image]]
-id = "nano-banana-pro"
-provider = "fal"
-name = "Nano Banana Pro"
-endpoint = "fal-ai/nano-banana-pro"
-usd_per_image = 0.15
-size_by = "aspect_ratio"
-licence = "Commercial use enabled through fal.ai"
+image = "dall-e-3"
 
 [[image]]
-id = "flux-dev"
-provider = "fal"
-name = "FLUX.1 [dev]"
-endpoint = "fal-ai/flux/dev"
-usd_per_megapixel = 0.025
-licence = "FLUX.1 [dev] Non-Commercial License (model weights)"
+id = "dall-e-3"
+provider = "openai"
+name = "DALL-E 3"
+endpoint = "dall-e-3"
+usd_per_image = 0.04
+usd_large = 0.08
+licence = "Generated through the image API; the provider's terms apply"
 
 [[image]]
-id = "flux-schnell"
-provider = "fal"
-name = "FLUX.1 [schnell]"
-endpoint = "fal-ai/flux/schnell"
-usd_per_megapixel = 0.003
-licence = "Apache-2.0 (model weights)"
-
-# Game-ready 3D models (GLB) from a picture, billed per model; `faces` is the face-count range the
-# model accepts.
-[[model_3d]]
-id = "tripo-p1"
-provider = "fal"
-name = "Tripo P1"
-endpoint = "tripo3d/p1/image-to-3d"
-usd = 0.40
-textured_usd = 0.50
-faces = [48, 20000]
+id = "gpt-image-1"
+provider = "openai"
+name = "GPT Image 1"
+endpoint = "gpt-image-1"
+usd_per_image = 0.04
+usd_large = 0.06
+licence = "Generated through the image API. The price is an estimate, not an invoice."

@@ -601,17 +601,17 @@ fn builds(app: &mut CraftApp, ui: &mut Ui) {
     ui.add_space(8.0);
     widgets::caption(ui, "Generated art (games)");
     let a = &mut app.settings.assets;
-    row(
-        ui,
-        "Budget for a new project",
-        "What a new game may spend on generated pictures and 3D models before you're asked. Each project keeps its own.",
-        |ui| {
-            changed |= number(ui, &mut a.budget_usd, 0.0..=10_000.0, "$", "");
-        },
-    );
+    row(ui, "Budget for a new project", "What a new game may spend on generated pictures before you're asked. Each project keeps its own.", |ui| {
+        changed |= number(ui, &mut a.budget_usd, 0.0..=10_000.0, "$", "");
+    });
     let table = craft_anything_engines::assets::Catalogue::built_in();
-    row(ui, "Picture model", "What pictures and textures are made with.", |ui| {
-        let current = table.image_model(a.image_model.as_deref()).or_else(|_| table.image_model(None)).map(|m| m.name.clone()).unwrap_or_default();
+    row(ui, "Picture model", "What pictures and textures are made with. Any other name in config.toml is sent to the server as the model.", |ui| {
+        let current = table
+            .image_model(a.image_model.as_deref())
+            .map(|m| m.name.clone())
+            .ok()
+            .or_else(|| a.image_model.clone().filter(|s| !s.trim().is_empty()).or_else(|| table.image_model(None).ok().map(|m| m.name.clone())))
+            .unwrap_or_default();
         egui::ComboBox::from_id_salt("image-model").icon(widgets::combo_icon).selected_text(current).show_ui(ui, |ui| {
             for m in table.images() {
                 let price = crate::usage::asset_cost_words(m.cost(craft_anything_engines::assets::Shape::Square));
@@ -623,6 +623,20 @@ fn builds(app: &mut CraftApp, ui: &mut Ui) {
                 }
             }
         });
+    });
+    row(ui, "API base URL", "The image server's root, ending in /v1. Blank uses OPENAI_BASE_URL, or https://api.openai.com/v1.", |ui| {
+        let mut base = a.base_url.clone().unwrap_or_default();
+        let resp = ui.add(
+            egui::TextEdit::singleline(&mut base)
+                .hint_text("https://api.openai.com/v1")
+                .desired_width(280.0)
+                .frame(widgets::text_field_frame_compact(&Tokens::get(ui.ctx()))),
+        );
+        if resp.changed() {
+            let t = base.trim();
+            a.base_url = if t.is_empty() { None } else { Some(t.to_string()) };
+            changed = true;
+        }
     });
     if changed {
         app.settings_changed();

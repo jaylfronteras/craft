@@ -242,13 +242,13 @@ fn games_hear_about_generated_assets_only_when_allowed_and_with_a_key() {
     let d = tempfile::tempdir().unwrap();
     let mut ws = Workspace::create(d.path(), "Game", "A snake game", TargetRef::None).unwrap();
     ws.manifest.stack = "Unity".into();
-    assert!(!brief(&ws, "game", false, false, None, true, None).contains("assets_model_generate"), "a key alone isn't the person's choice");
+    assert!(!brief(&ws, "game", false, false, None, true, None).contains("assets_image_generate"), "a key alone isn't the person's choice");
     ws.manifest.generate_assets = true;
     let with = brief(&ws, "game", false, false, None, true, None);
-    assert!(with.contains("assets_model_generate") && with.contains("$5.00") && with.contains("Assets/Generated/"), "{with}");
+    assert!(with.contains("assets_image_generate") && with.contains("$5.00") && with.contains("Assets/Generated/"), "{with}");
     assert!(with.contains("never a recognisable character, logo or brand artwork"));
-    assert!(!brief(&ws, "game", false, false, None, false, None).contains("assets_model_generate"), "no key, no asset tools");
-    assert!(!brief(&ws, "app", false, false, None, true, None).contains("assets_model_generate"), "games only");
+    assert!(!brief(&ws, "game", false, false, None, false, None).contains("assets_image_generate"), "no key, no asset tools");
+    assert!(!brief(&ws, "app", false, false, None, true, None).contains("assets_image_generate"), "games only");
 }
 
 #[test]
@@ -265,12 +265,11 @@ fn a_new_project_keeps_the_persons_asset_choice() {
 fn the_assets_note_reads_prices_from_the_asset_table() {
     let d = tempfile::tempdir().unwrap();
     let ws = Workspace::create(d.path(), "Game", "A snake game", TargetRef::None).unwrap();
-    // The default picture model is Nano Banana Pro ($0.15 a picture).
-    let before = "Realistic assets: you can make them with fal.ai. assets_model_generate makes a textured, game-ready low-poly 3D model (GLB) of one object from a description (about $0.65 each); set faces to the fewest that still look right (about 500-1500 for small props, 2000-5000 for weapons and vehicles, 6000-15000 for main characters) so the game stays fast; assets_image_generate makes a picture (about $0.15) for textures, skies, backgrounds and menu art. This project's asset budget is $5.00 ($0.00 used), so spend it on what the player sees most (the main characters, weapons, vehicles and the level's key props) and use simple shapes for the rest. Save each one inside app/ where the engine loads it (e.g. assets/generated/). Every asset is an original design in the original's style: describe what it is, its shape, materials and colours, never a recognisable character, logo or brand artwork. List each generated file in app/CREDITS.md as made with fal.ai.";
+    // The default picture model is DALL-E 3 ($0.04 a square picture).
+    let before = "Realistic assets: you can make pictures with an OpenAI-compatible image API. assets_image_generate makes a picture (about $0.04) for textures, skies, backgrounds and menu art. 3D models are not generated (there is no standard 3D endpoint), so build objects from simple shapes. This project's asset budget is $5.00 ($0.00 used), so spend it on what the player sees most and use simple shapes for the rest. Save each picture inside app/ where the engine loads it (e.g. assets/generated/). Every picture is an original design in the original's style: describe what it is, its shape, materials and colours, never a recognisable character, logo or brand artwork. List each generated file in app/CREDITS.md as made with an OpenAI-compatible image API.";
     assert_eq!(assets_note(&ws, None), before);
     assert_eq!(assets_note(&ws, Some("no-such-model")), before, "an unknown model quotes the default's prices");
-    let schnell = assets_note(&ws, Some("flux-schnell"));
-    assert!(schnell.contains("(about $0.50 each)") && schnell.contains("a picture (under $0.01)"), "{schnell}");
+    assert!(assets_note(&ws, Some("dall-e-3")).contains("a picture (about $0.04)"), "the named default");
 }
 
 #[test]
@@ -387,10 +386,7 @@ fn games_get_the_mechanics_sheet_and_decompile_only_in_deep_mode() {
     assert!(!generated.contains("Art, sounds, models") && generated.contains("Sounds, music, fonts, animations and maps"), "{generated}");
     // Clean room with generated assets: generated art, the rest its own; still nothing copied.
     let generated = brief(&gen_ws, "game", false, false, None, true, None);
-    assert!(
-        generated.contains("take nothing from the original game's files") && generated.contains("with assets_model_generate and assets_image_generate"),
-        "{generated}"
-    );
+    assert!(generated.contains("take nothing from the original game's files") && generated.contains("with assets_image_generate"), "{generated}");
     assert!(generated.contains("Realistic assets") && !generated.contains("original game's own files"), "{generated}");
     let with_ghidra = brief(&ws, "game", true, true, None, false, None);
     assert!(with_ghidra.contains("reads the code with Ghidra") && with_ghidra.contains("never skip decompiling") && !with_ghidra.contains("isn't installed"));
@@ -1269,7 +1265,7 @@ fn a_resumed_game_builder_hears_the_asset_choice_as_it_is_now() {
     // Turned on after the first build, with a key: the follow-up carries the asset note and budget.
     ws.set_person(|m| m.generate_assets = true).unwrap();
     let on = game.follow_up_sections(&cx(&ws, true));
-    assert!(on[0].contains("assets_model_generate") && on[0].contains("$5.00"), "{on:?}");
+    assert!(on[0].contains("assets_image_generate") && on[0].contains("$5.00"), "{on:?}");
     assert!(game.follow_up_sections(&cx(&ws, false)).is_empty(), "no key: not offered");
     // Turned off after some were made: say so.
     let rec = craft_anything_engine::workspace::AssetRecord { file: "a.glb".into(), kind: "model".into(), prompt: "a crate".into(), cost_usd: 0.5, at_ms: 1 };

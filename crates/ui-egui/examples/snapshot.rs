@@ -297,7 +297,7 @@ fn main() {
     if want("assets-offer") {
         render(&out, "assets-offer", w, h, scale, move || {
             let mut a = engine_app(None, false);
-            a.asset_keys = Some([(craft_anything_engines::assets::fal::ID.to_string(), false)].into());
+            a.asset_keys = Some([(craft_anything_engines::assets::openai::ID.to_string(), false)].into());
             a.state.make.generate_assets = true;
             a.state.modal = Some(craft_anything_ui_egui::state::Modal::Assets);
             a
@@ -351,7 +351,7 @@ fn main() {
         let mut a = engine_app(None, false);
         a.state.settings_open = true;
         a.state.settings_tab = craft_anything_ui_egui::state::SettingsTab::Ai;
-        a.asset_keys = Some([(craft_anything_engines::assets::fal::ID.to_string(), false)].into());
+        a.asset_keys = Some([(craft_anything_engines::assets::openai::ID.to_string(), false)].into());
         let b = |name: &str, kind, model: &str| BackendConfig { name: name.into(), kind, model: model.into(), base_url: None, ssh_host: None, enabled: true };
         a.backends = vec![
             b("Claude Code", BackendKind::AgentCli, "claude-code"),

@@ -1,11 +1,12 @@
-//! Asset providers' keys (fal.ai today) for generated game assets as tools, so they can be set up
-//! without the app. Each provider has its own key, in the system keychain (or the private key
-//! file); a key is never returned, and the journal redacts `api_key` like every secret-named field.
+//! Asset providers' keys (the OpenAI-compatible image API) for generated game pictures as tools,
+//! so they can be set up without the app. Each provider has its own key, in the system keychain
+//! (or the private key file); a key is never returned, and the journal redacts `api_key` like
+//! every secret-named field.
 
 use crate::AiHub;
 use craft_anything_engine::EngineRef;
 use craft_anything_engine::tool::{Ctx, Effects, Requires, ToolOutput, ToolSpec, Toolset, parse_params, schema_of};
-use craft_anything_engines::assets::{AssetProvider, AssetProviders, fal};
+use craft_anything_engines::assets::{AssetProvider, AssetProviders, openai};
 use craft_anything_evidence::{ErrorCode, ToolError};
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -28,7 +29,7 @@ pub fn specs() -> Vec<ToolSpec> {
         spec(
             "assets_key_status",
             "Is an asset key set up?",
-            "Whether each asset provider (fal.ai today) has a key for generated pictures and 3D models, stored or in its environment variable. `stored` answers for `provider` (default fal). Keys themselves are never shown.",
+            "Whether each asset provider (the OpenAI-compatible image API) has a key for generated pictures, stored or in OPENAI_API_KEY. `stored` answers for `provider` (default openai). Keys themselves are never shown.",
             "Shows whether generated art is set up.",
             Effects::READ_ONLY,
             schema_of::<ProviderParams>,
@@ -37,7 +38,7 @@ pub fn specs() -> Vec<ToolSpec> {
         spec(
             "assets_key_set",
             "Save an asset key",
-            "Store an asset provider's key (`provider`, default fal) for generated pictures and 3D models in the system keychain (or the private key file). It's never shown again or written to logs.",
+            "Store an asset provider's key (`provider`, default openai) for generated pictures in the system keychain (or the private key file). It's never shown again or written to logs.",
             "Saves your key for generated art.",
             Effects::WRITES_FILESYSTEM,
             schema_of::<SetParams>,
@@ -46,7 +47,7 @@ pub fn specs() -> Vec<ToolSpec> {
         spec(
             "assets_key_remove",
             "Remove an asset key",
-            "Remove an asset provider's stored key (`provider`, default fal).",
+            "Remove an asset provider's stored key (`provider`, default openai).",
             "Removes your key for generated art.",
             Effects::WRITES_FILESYSTEM,
             schema_of::<ProviderParams>,
@@ -58,7 +59,7 @@ pub fn specs() -> Vec<ToolSpec> {
 #[derive(Debug, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct ProviderParams {
-    /// The asset provider's id (default `fal`).
+    /// The asset provider's id (default `openai`).
     #[serde(default)]
     pub provider: Option<String>,
 }
@@ -68,7 +69,7 @@ pub struct ProviderParams {
 pub struct SetParams {
     /// The provider's key.
     pub api_key: String,
-    /// The asset provider's id (default `fal`).
+    /// The asset provider's id (default `openai`).
     #[serde(default)]
     pub provider: Option<String>,
 }
@@ -78,10 +79,10 @@ fn providers(ctx: &Ctx<'_>) -> AssetProviders {
     ctx.session.ext.get::<AssetProviders>().map(|p| p.as_ref().clone()).unwrap_or_default()
 }
 
-/// The provider named (default fal), refused when there's no such provider.
+/// The provider named (default openai), refused when there's no such provider.
 fn provider(ctx: &Ctx<'_>, id: Option<&str>) -> Result<Arc<dyn AssetProvider>, ToolError> {
     let all = providers(ctx);
-    let id = id.map(str::trim).filter(|s| !s.is_empty()).unwrap_or(fal::ID);
+    let id = id.map(str::trim).filter(|s| !s.is_empty()).unwrap_or(openai::ID);
     all.get(id).ok_or_else(|| {
         ToolError::invalid(format!("There's no asset provider called {id:?}.")).with_remediation(format!("Use one of: {}.", all.ids().join(", ")))
     })
@@ -147,7 +148,7 @@ mod tests {
         let other = json!({"provider": "nope"});
         for (id, params) in [("assets_key_set", &set), ("assets_key_status", &other), ("assets_key_remove", &other)] {
             let err = e.call(id, params.clone(), CallOptions::new(Caller::Cli)).unwrap_err();
-            assert!(err.message.contains("no asset provider called \"nope\"") && err.remediation.unwrap_or_default().contains("fal"), "{id}");
+            assert!(err.message.contains("no asset provider called \"nope\"") && err.remediation.unwrap_or_default().contains("openai"), "{id}");
         }
     }
 }

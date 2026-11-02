@@ -20,7 +20,7 @@ sha2 = { workspace = true }
 hex = { workspace = true }
 thiserror = { workspace = true }
 ureq = "3"
-# The same version the engine crate uses (fal.ai sends files as base64 in some answers).
+# The same version the engine crate uses (the image API sends pictures as base64).
 base64 = "0.22"
 # The WebSocket handshake of the CDP client.
 sha1 = "0.10"

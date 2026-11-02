@@ -125,9 +125,9 @@ pub(super) fn start_files_note(m: &craft_anything_engine::workspace::Manifest) -
     })
 }
 
-/// Realistic assets with fal.ai: what each tool makes and costs (prices from the asset table,
-/// for the picture model `image_model` names), the budget, where the engine loads them from, and
-/// that every design is original.
+/// Realistic pictures from an OpenAI-compatible image API: what the tool costs (the price of the
+/// picture model `image_model` names, or the default), the budget, where the engine loads them
+/// from, and that every design is original. 3D models are not offered.
 pub(super) fn assets_note(ws: &Workspace, image_model: Option<&str>) -> String {
     let folder = match game::Builder::from_stack(&ws.manifest.stack) {
         Some(game::Builder::Unity) => "Unity loads them from Assets/, e.g. Assets/Generated/",
@@ -139,13 +139,14 @@ pub(super) fn assets_note(ws: &Workspace, image_model: Option<&str>) -> String {
     let spent = ws.assets_spent();
     let table = Catalogue::built_in();
     // An unknown picture model is reported by the tool itself; the note quotes the default's price.
-    let picture = table.image_model(image_model).or_else(|_| table.image_model(None)).map(|m| m.cost(Shape::Square));
-    let (model_cost, picture_cost) = match (table.model_3d(None).map(|m| m.cost(true)), picture) {
-        (Ok(model), Ok(picture)) => (format!(" ({} each)", about_usd(model + picture)), format!(" ({})", about_usd(picture))),
-        _ => (String::new(), String::new()),
-    };
+    let picture_cost = table
+        .image_model(image_model)
+        .or_else(|_| table.image_model(None))
+        .map(|m| m.cost(Shape::Square))
+        .map(|c| format!(" ({})", about_usd(c)))
+        .unwrap_or_default();
     format!(
-        "Realistic assets: you can make them with fal.ai. assets_model_generate makes a textured, game-ready low-poly 3D model (GLB) of one object from a description{model_cost}; set faces to the fewest that still look right (about 500-1500 for small props, 2000-5000 for weapons and vehicles, 6000-15000 for main characters) so the game stays fast; assets_image_generate makes a picture{picture_cost} for textures, skies, backgrounds and menu art. This project's asset budget is ${budget:.2} (${spent:.2} used), so spend it on what the player sees most (the main characters, weapons, vehicles and the level's key props) and use simple shapes for the rest. Save each one inside app/ where the engine loads it ({folder}). Every asset is an original design in the original's style: describe what it is, its shape, materials and colours, never a recognisable character, logo or brand artwork. List each generated file in app/CREDITS.md as made with fal.ai."
+        "Realistic assets: you can make pictures with an OpenAI-compatible image API. assets_image_generate makes a picture{picture_cost} for textures, skies, backgrounds and menu art. 3D models are not generated (there is no standard 3D endpoint), so build objects from simple shapes. This project's asset budget is ${budget:.2} (${spent:.2} used), so spend it on what the player sees most and use simple shapes for the rest. Save each picture inside app/ where the engine loads it ({folder}). Every picture is an original design in the original's style: describe what it is, its shape, materials and colours, never a recognisable character, logo or brand artwork. List each generated file in app/CREDITS.md as made with an OpenAI-compatible image API."
     )
 }
 
@@ -220,7 +221,7 @@ pub(super) fn game_steps(deep: bool, ghidra: bool, has_target: bool, generated: 
         s.push_str("\n- We can't watch the original running on this computer yet. For how it looks in play, use the pictures in reference/; when something about how it behaves isn't in the evidence, ask the person with core_person_ask.");
         if !deep {
             let make = if generated {
-                "Make the models, textures and UI pictures with assets_model_generate and assets_image_generate, and your own sounds, music, fonts and maps"
+                "Make the textures and UI pictures with assets_image_generate, build models from simple shapes, and make your own sounds, music, fonts and maps"
             } else {
                 "Make your own simple versions"
             };
@@ -231,7 +232,7 @@ pub(super) fn game_steps(deep: bool, ghidra: bool, has_target: bool, generated: 
         }
         let (lead, bring) = if generated {
             (
-                "- Models, textures and UI pictures: the person chose to generate new ones, so make them with assets_model_generate and assets_image_generate in the original's style instead of copying the original's.\n- Sounds, music, fonts, animations and maps: the person wants them 1:1 from the original game's own files",
+                "- Textures and UI pictures: the person chose to generate new ones, so make them with assets_image_generate in the original's style instead of copying the original's. Build 3D models from simple shapes in that same style (there is no 3D image API).\n- Sounds, music, fonts, animations and maps: the person wants them 1:1 from the original game's own files",
                 "the sounds, music, fonts, animations and maps",
             )
         } else {

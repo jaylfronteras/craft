@@ -29,7 +29,8 @@ API key (stored in your system keychain)	API キー(システムのキーチェ�
 Add	追加
 Add Visual Studio's C++ tools	Visual Studio の C++ ツールを追加
 Add a brain	AI を追加
-Add a fal.ai key	fal.ai のキーを追加
+Add an API key	API キーを追加
+API base URL	API のベース URL
 Add a folder…	フォルダを追加…
 Add a plugin	プラグインを追加
 Add an AI brain and I'll read this evidence for you, answer follow-up questions and point at the proof.	AI を追加すると、このエビデンスを読み、追加の質問に答え、根拠を示します。
@@ -239,7 +240,7 @@ General	一般
 Generate custom pictures and models	独自の画像とモデルを生成
 Generated art (games)	生成アート(ゲーム)
 Generated assets	生成アセット
-Generated pictures and 3D models are made with fal.ai.	生成画像と 3D モデルは fal.ai で作成します。
+Generated pictures are made with an OpenAI-compatible API.	生成画像は OpenAI 互換 API で作成します。
 Get Ghidra	Ghidra を入手
 Get Ghidra for Deep mode	ディープモード用に Ghidra を入手
 Get Unity Hub	Unity Hub を入手
@@ -337,7 +338,7 @@ Leave a few GB for the rest of your computer.	コンピュータの他の用途�
 Leave a path empty to use the managed install. We never need environment variables.	パスを空にすると管理インストールを使います。環境変数は不要です。
 Leave empty to use the one Craft Anything sets up.	空にすると Craft Anything が用意したものを使います。
 Let's go	始めましょう
-Lets the builder make realistic 3D models and textures for games, {model} a model, with a {budget} budget per project.	ビルダーがゲーム用のリアルな 3D モデルとテクスチャを作れるようにします。1 モデルあたり {model}、プロジェクトごとの予算は {budget} です。
+Lets the builder make pictures and textures for games, {picture} a picture, with a {budget} budget per project.	ビルダーがゲーム用の画像とテクスチャを作れるようにします。画像 1 枚あたり {picture}、プロジェクトごとの予算は {budget} です。
 Light copy: shares big files with the project	軽量コピー: 大きなファイルをプロジェクトと共有
 Likeness	類似度
 Live: the project's latest build	ライブ: プロジェクトの最新ビルド
@@ -361,7 +362,7 @@ Looking inside needs Deep mode	中を覗くにはディープモードが必要�
 Looking inside software you own or are allowed to examine is normal and often protected (learning, compatibility, security). Saying why helps you keep to it; it stays on this computer.	自分が所有している、または調べる許可があるソフトの中を見るのは普通のことで、多くの場合に保護されています(学習、互換性、セキュリティ)。理由を書いておくと遵守しやすくなります。この内容はこのコンピュータから出ません。
 Looking on this computer…	このコンピュータを探しています…
 Made a copy: {name}	コピーを作成しました: {name}
-Made with fal.ai and paid from your account: {model} a 3D model, {picture} a picture. Off, the game is built without them.	fal.ai で作成し、あなたのアカウントに課金されます(3D モデル 1 点あたり {model}、画像 1 枚あたり {picture})。オフの場合は、それらなしでゲームをビルドします。
+Made with an OpenAI-compatible API and paid from your account ({picture} a picture). 3D models aren't available. Off, the game is built without them.	OpenAI 互換 API で作成し、あなたのアカウントに課金されます（画像 1 枚あたり {picture}）。3D モデルは作れません。オフの場合は、それらなしでゲームをビルドします。
 Made with {engine}	{engine} 製
 Made without looking inside the original.	元の中を見ずに作成しました。
 Make a game that plays like this	このゲームと同じ遊び方のゲームを作る
@@ -381,7 +382,7 @@ More detail	詳細を表示
 More makes a big program's first look faster.	メモリが多いほど、大きなプログラムの初回解析が速くなります。
 More memory makes Ghidra's first look at a big program faster; leave some for the rest of the computer. Used from the next time Ghidra starts.	メモリが多いほど大きなプログラムの初回解析が速くなります。コンピュータの他の用途のために残してください。次回 Ghidra 起動時から反映されます。
 Name (optional)	名前(任意)
-Needs a fal.ai key. Until then the game is built without them.	fal.ai のキーが必要です。それまでは、それらなしでゲームをビルドします。
+Needs an API key. Until then the game is built without them.	API キーが必要です。それまでは、それらなしでゲームをビルドします。
 Needs you	あなたの対応待ち
 Network	ネットワーク
 New project	新規プロジェクト
@@ -646,7 +647,8 @@ Targets	対象
 That folder already has {names}, where Craft Anything keeps its own files. Pick another folder, or move those out first.	そのフォルダには、Craft Anything が自分のファイルを置く {names} が既にあります。別のフォルダを選ぶか、先にそれらを移してください。
 That folder is already a project, so it's open now.	そのフォルダはすでにプロジェクトなので、開きました。
 The builder answers its own questions and says what it chose ("I decided: …"), so you can change it.	ビルダーは自分の質問に自分で答え、選んだ内容(「こう決めました: …」)を伝えるので、あとから変更できます。
-The builder makes the game's 3D models and textures from descriptions of original designs, paid from your fal.ai account. Models are low-poly so the game runs fast. A textured model costs {model} and a picture {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain.	ビルダーは、元のデザインを説明した内容からゲームの 3D モデルとテクスチャを作ります。費用はあなたの fal.ai アカウントから支払います。モデルは軽量(ローポリゴン)なので、ゲームが軽快に動きます。テクスチャ付きモデル 1 点が {model}、画像 1 枚が {picture}。プロジェクトごとに {budget} の予算があり、超える前に確認します。キーはシステムのキーチェーンに保存されます。
+The builder makes pictures and textures from descriptions of original designs, paid from your API account. A picture costs {picture}. Each project has a {budget} budget, and you're asked before it goes over. The key is kept in your system keychain. 3D models aren't available on this API.	ビルダーは、元のデザインを説明した内容から画像とテクスチャを作ります。費用はあなたの API アカウントから支払います。画像 1 枚が {picture}。プロジェクトごとに {budget} の予算があり、超える前に確認します。キーはシステムのキーチェーンに保存されます。この API では 3D モデルは作れません。
+The image server's root, ending in /v1. Blank uses OPENAI_BASE_URL, or https://api.openai.com/v1.	画像サーバーのルート。末尾は /v1。空欄なら OPENAI_BASE_URL、なければ https://api.openai.com/v1。
 The builder reads them (code, notes, pictures) and builds the app in a new app folder beside them. Your files stay as they are.	ビルダーがそれら(コード、メモ、画像)を読み、隣の新しい app フォルダにアプリをビルドします。あなたのファイルはそのまま残ります。
 The builder will decide its questions and tell you what it chose.	ビルダーが質問への答えを自分で決め、選んだ内容を伝えます。
 The builder works on these files directly and keeps what works. Craft Anything adds a few records of its own beside them.	ビルダーがこれらのファイルを直接編集し、うまくいったものを残します。Craft Anything はそれらの隣に、自身の記録を少しだけ追加します。
@@ -722,7 +724,7 @@ We read its code and files with every tool we have. For your private use.	すべ
 Website address	Web サイトのアドレス
 Website pages	Web サイトのページ数
 Welcome	ようこそ
-What a new game may spend on generated pictures and 3D models before you're asked. Each project keeps its own.	新しいゲームが生成画像と 3D モデルに使える上限。超える前に確認します。プロジェクトごとに管理されます。
+What a new game may spend on generated pictures before you're asked. Each project keeps its own.	新しいゲームが生成画像に使える上限。超える前に確認します。プロジェクトごとに管理されます。
 What are its main parts?	主な構成は?
 What brings you here?	ここに来た目的は?
 What can Craft Anything do?	Craft Anything でできること
@@ -742,7 +744,7 @@ What happened in this build	このビルドで起きたこと
 What is it	何のファイルか
 What kind of file is this?	これは何のファイル?
 What permissions does it ask for?	どんな権限を要求する?
-What pictures and textures are made with.	画像とテクスチャの生成に使うもの。
+What pictures and textures are made with. Any other name in config.toml is sent to the server as the model.	画像とテクスチャの生成に使うもの。config.toml の別の名前はそのままモデル名としてサーバーへ送られます。
 What settings are in here?	どんな設定がある?
 What tables are in here?	どんなテーブルがある?
 What we couldn't check	確認できなかったこと
@@ -782,7 +784,7 @@ You can add a Claude, ChatGPT or OpenRouter key, a local model (Ollama, LM Studi
 You chose:	あなたの選択:
 You're all set	準備が整いました
 Your brains	登録済みの AI
-Your fal.ai key	fal.ai のキー
+Your API key	API キー
 Your message wasn't sent: another project was opened while its pictures were copied.	メッセージは送信されませんでした。画像のコピー中に別のプロジェクトが開かれました。
 Your own tool installs (optional)	自分で入れたツール(任意)
 Your project starts as soon as it's done.	完了するとすぐにプロジェクトが始まります。

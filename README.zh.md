@@ -206,7 +206,7 @@ craft-anything-cli rebuild - "Add a contact form" --project-folder "<your folder
 >
 > - **今天可用：** 桌面应用（简单与进阶模式）、CLI 和 MCP 服务器；以 Claude Code 作为构建方、面向网站/应用/游戏的
 >   研究 → 构建 → 检查 → 收敛 流程；三种屏宽下的网站检查；Unity、Unreal 或 Godot 的游戏重建；带 Ghidra 的深度
->   模式；生成图片和 3D 模型（需自行选择开启，用你自己的 fal.ai 密钥）；插件（MCP 服务器，以及开启 `wasm-plugins`
+>   模式；生成图片（需自行选择开启，使用任何兼容 OpenAI 的图像接口）；插件（MCP 服务器，以及开启 `wasm-plugins`
 >   选项的构建中的 WASM 组件）。
 > - **部分可用：** 用 API 密钥和其他编码 agent 构建（已实现，尚未真机跑通），应用和游戏的行为检查，少数引擎工具只用替身测过。
 > - **接下来：** 第一次公开发布（Windows、macOS、Linux 和 FreeBSD 的安装包，以及浏览器查看器都已在 CI 里配好），然后是托管版。

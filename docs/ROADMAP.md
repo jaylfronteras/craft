@@ -333,11 +333,10 @@ Owner: open · Status: done (branch `feature/r1.4-asset-providers`)
 - [x] A resumed builder hears the asset choice as it is now: `TargetKind::follow_up_sections`; a
       game's follow-up carries the asset note (budget, spent) when assets are on with a key, or
       says they're now off when some were made before
-- [ ] Run Nano Banana Pro once with a real key (a picture, then a 3D model from it) and check the
-      picture's size and the invoice ($0.15)
-- [ ] fal bills pictures "by rounding up to the nearest megapixel"; estimates use the exact size.
-      Confirm on a real invoice whether a 1024×1024 picture bills as 1 or 2 megapixels, then round
-      in the table (needs a key)
+- [x] fal.ai was replaced by an OpenAI-compatible image API (`POST /images/generations`: base URL,
+      `OPENAI_API_KEY`, model name). The two fal follow-ups (a live Nano Banana run, and fal's
+      megapixel rounding) no longer apply. 3D generation has no OpenAI-compatible endpoint, so
+      `assets_model_generate` says so and the builder uses simple shapes for objects
 
 ### R1.5 External engine trait in L3
 Owner: open · Status: in progress (branch `feature/r1.5-engine-table`: table and pins done; transports pending)
